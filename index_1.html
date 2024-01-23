@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection Webpage</title>
+</head>
+<body>
+
+<input type="file" id="fileInput" accept="image/*">
+<button onclick="predict()">Predict</button>
+<div id="result"></div>
+
+<script>
+function predict() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const imageData = e.target.result.split(',')[1];  // Extract base64 data
+
+            // Send the data to the API endpoint
+            fetch('https://keras-io-object-detection-using-retinanet.hf.space/api/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    data: [imageData],
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response
+                console.log(data);
+                document.getElementById('result').innerHTML = `<img src="data:image/png;base64,${data.data[0]}" alt="Detected Objects">`;
+            })
+            .catch(error => console.error('Error:', error));
+        };
+
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+
+</body>
+</html>
